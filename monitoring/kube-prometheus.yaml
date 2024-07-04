@@ -1,0 +1,35 @@
+prometheus:
+  prometheusSpec:
+    retention: 5h
+    scrapeInterval: 15s
+    evaluationInterval: 15s
+    scrapeTimeout: 10s
+    additionalScrapeConfigs:
+      - job_name: 'StarRocks_Cluster' 
+        metrics_path: '/metrics'    
+
+        static_configs:
+          - targets:
+            - 10.0.15.149:8030
+            
+            labels:
+              group: fe
+
+    storageSpec:
+      volumeClaimTemplate:
+        metadata:
+          name: data
+        spec:
+          storageClassName: gp3
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 50Gi
+
+grafana:
+  enabled: true
+  defaultDashboardsEnabled: true
+  sidecar:
+    dashboards:
+      enabled: true
