@@ -93,7 +93,23 @@ module "eks_blueprints_addons" {
     values = [templatefile("${path.module}/helm-values/metrics-server-values.yaml", {})]
   }
 
-
+  #---------------------------------------
+  # Karpenter Autoscaler for EKS Cluster
+  #---------------------------------------
+  enable_karpenter                  = true
+  karpenter_enable_spot_termination = true
+  karpenter_node = {
+    iam_role_use_name_prefix     = false
+    iam_role_name                = "${var.name}-karpenter-node"
+    iam_role_additional_policies = {
+      AmazonSSMManagedInstanceCore = "arn:aws:iam::aws:policy/AmazonSSMManagedInstanceCore"
+    }
+  }
+  karpenter = {
+    chart_version       = "v0.34.0"
+    repository_username = data.aws_ecrpublic_authorization_token.token.user_name
+    repository_password = data.aws_ecrpublic_authorization_token.token.password
+  }
 
   #---------------------------------------
   # Prommetheus and Grafana stack
@@ -109,7 +125,7 @@ module "eks_blueprints_addons" {
     
     values = [
       templatefile("${path.module}/monitoring/kube-prometheus.yaml", {
-        fe_targets           = local.starrocks_fe_targets
+        fe_targets = local.starrocks_fe_targets
         })
       ]
     }
@@ -125,8 +141,8 @@ resource "kubernetes_config_map" "starrocks-dashboard" {
   }
 
   data = {
-    "starrocks-dashboard.json" = "${file("${path.module}/monitoring/starrocks-grafana-dashboard.json")}"
-    StarRocks_Prometheus       = local.StarRocks_Prometheus
+    "starrocks-dashboard-starlet.json" = "${file("${path.module}/monitoring/starrocks-grafana-dashboard-starlet.json")}",
+    "starrocks-dashboard-general.json" = "${file("${path.module}/monitoring/starrocks-grafana-dashboard-general.json")}"
   }
 
   depends_on = [
@@ -135,5 +151,20 @@ resource "kubernetes_config_map" "starrocks-dashboard" {
 
 }
 
+#---------------------------------------
+# Karpenter Provisioners
+#---------------------------------------
+# data "kubectl_path_documents" "karpenter_resources" {
+#   pattern = "${path.module}/karpenter-resources/node-*.yaml"
+#   vars = {
+#     azs            = local.region
+#     eks_cluster_id = module.eks.cluster_name
+#   }
+# }
 
+# resource "kubectl_manifest" "karpenter_resources" {
+#   for_each  = toset(data.kubectl_path_documents.karpenter_resources.documents)
+#   yaml_body = each.value
 
+#   depends_on = [module.eks_blueprints_addons]
+# }
