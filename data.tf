@@ -26,3 +26,4 @@ data "kubernetes_resources" "starrocks_fe_pods" {
   depends_on = [time_sleep.wait_180_seconds]
 }
 
+data "aws_ecrpublic_authorization_token" "token" {}
