@@ -24,16 +24,18 @@ module "eks" {
       max_size     = 4
       desired_size = 4
 
-      instance_types = ["m7g.8xlarge"]
+      instance_types = ["c6i.16xlarge"]
 
-      ami_type = "BOTTLEROCKET_ARM_64"
+      # ami_type = "AL2023_ARM_64_STANDARD"
+
+      key_name = "0505"
 
       ebs_optimized = true
       block_device_mappings = {
         xvda = {
           device_name = "/dev/xvda"
           ebs = {
-            volume_size = 50
+            volume_size = 200
             volume_type = "gp3"
           }
         }
