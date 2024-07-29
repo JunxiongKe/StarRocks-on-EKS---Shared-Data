@@ -12,6 +12,4 @@ locals {
 
   starrocks_fe_targets = formatlist("%s:8030", local.starrocks_fe_pod_ips)
 
-  StarRocks_Prometheus = "Prometheus"
-
 }
