@@ -10,10 +10,15 @@ prometheus:
 
         static_configs:
           - targets:
-            - 10.0.15.149:8030
-            
+            - 10.0.12.230:8030          
             labels:
               group: fe
+          
+          - targets:
+            - 10.0.40.157:8040
+            - 10.0.7.15:8040
+            labels:
+              group: be
 
     storageSpec:
       volumeClaimTemplate:
