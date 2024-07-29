@@ -8,7 +8,7 @@ resource "helm_release" "starrocks_operator" {
 
   wait = true
 
-  depends_on = [module.eks]
+  depends_on = [kubernetes_storage_class.ebs_csi_encrypted_gp3_storage_class]
   
   values = [
     templatefile("${path.module}/helm-values/starrocks-values.yaml",{
